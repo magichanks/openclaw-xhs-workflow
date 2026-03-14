@@ -1,25 +1,28 @@
 # OpenClaw XiaoHongShu Workflow
 
-Build one XiaoHongShu post as a resumable pack:
+Give this workflow one topic, and it will turn that topic into a reviewable XiaoHongShu post draft:
 
 `research -> copy -> image -> review -> publisher`
 
-In concrete terms, this repository does one thing:
+More concretely, this repository does this:
 
-it takes one topic plus one scheduler file, runs the XiaoHongShu content workflow stage by stage, and leaves behind a pack directory that contains the draft content, cover asset, review result, publish result, and run history.
+1. take one topic
+2. run it through research, copywriting, cover generation, review, and publisher preparation
+3. leave behind a complete pack directory that can be inspected, resumed, saved to draft, or published later
 
-更具体地说，这个仓库只做一件事：
+更具体地说，这个仓库做的是这件事：
 
-它接收“一个选题 + 一份 scheduler 文件”，按阶段跑完整个小红书内容工作流，并最终产出一个 pack 目录；目录里会留下草稿内容、封面素材、审核结果、发布结果和运行历史。
+1. 接收一个选题
+2. 让它依次经过 research、文案、封面、审核、发布准备
+3. 最终产出一个完整的 pack 目录，供你检查、续跑、存草稿或稍后正式发布
 
-Typical input:
+What you provide at the human level:
 
-- one scheduler JSON
-- one packs root directory
-- optionally one existing pack directory
+- one topic
 - optionally one real cover image
+- optionally your own OpenClaw environment for real runs
 
-Typical output:
+What the workflow gives back:
 
 - `brief.md`
 - `title.txt`
@@ -32,14 +35,13 @@ Typical output:
 - `agent_runs.json`
 - `workflow_state.json`
 
-典型输入：
+从人的视角，你实际提供的是：
 
-- 一份 scheduler JSON
-- 一个 packs 根目录
-- 可选，一个已有的 pack 目录
+- 一个选题
 - 可选，一张真实封面图
+- 可选，你自己的 OpenClaw 运行环境
 
-典型输出：
+workflow 最终返回的是：
 
 - `brief.md`
 - `title.txt`
@@ -55,6 +57,50 @@ Typical output:
 If it succeeds in `save_draft` mode, the result is not just “some text was generated”. The result is a complete, inspectable working folder for one XiaoHongShu post.
 
 如果它以 `save_draft` 模式成功结束，结果不只是“生成了一段文案”，而是得到了一整个可检查、可续跑的小红书内容工作目录。
+
+## What Happens To One Topic
+
+When you give the workflow one topic, it goes through these stages:
+
+1. `research`
+   It expands the topic into angles, pain points, and claim boundaries.
+2. `copy`
+   It writes the title, body, hashtags, asset plan, and image prompt.
+3. `image`
+   It prepares one cover image, either from a source file or an image model.
+4. `review`
+   It checks whether the pack is publishable and records the decision.
+5. `publisher`
+   It fills the publish form and usually stops at `save_draft` unless publish is explicitly allowed.
+
+给一个选题之后，它会依次经过这些阶段：
+
+1. `research`
+   把选题扩展成角度、痛点和可说不可说的边界。
+2. `copy`
+   生成标题、正文、标签、素材计划和配图提示。
+3. `image`
+   准备一张封面图，来源可以是真实文件，也可以是图像模型。
+4. `review`
+   检查这条内容是否具备可发布条件，并记录审核结论。
+5. `publisher`
+   填写发布表单，默认通常停在 `save_draft`，除非明确允许正式发布。
+
+So the real outcome is:
+
+- not just a title
+- not just a prompt
+- not just one final publish action
+
+It is a complete post package with state, files, and history.
+
+所以它真正交付的不是：
+
+- 只有一个标题
+- 只有一段 prompt
+- 只有一次最终发布动作
+
+而是一整套带状态、带文件、带历史记录的内容包。
 
 
 ## What This Project Is
@@ -111,13 +157,13 @@ It is not trying to be:
 
 Think of this project as:
 
-- a compiler from `scheduler.json` to `pack/`
+- a machine that turns `topic -> pack/`
 - plus a state machine that lets you resume after failure
 - plus a publisher boundary that can stop at draft instead of forcing final publish
 
 把这个项目理解成下面这样会更直观：
 
-- 一个把 `scheduler.json` 变成 `pack/` 的编译器
+- 一个把 `topic -> pack/` 的工作机
 - 外加一个失败后可续跑的状态机
 - 外加一个可以停在草稿而不是强制发布的 publisher 边界
 
