@@ -4,6 +4,58 @@ Build one XiaoHongShu post as a resumable pack:
 
 `research -> copy -> image -> review -> publisher`
 
+In concrete terms, this repository does one thing:
+
+it takes one topic plus one scheduler file, runs the XiaoHongShu content workflow stage by stage, and leaves behind a pack directory that contains the draft content, cover asset, review result, publish result, and run history.
+
+更具体地说，这个仓库只做一件事：
+
+它接收“一个选题 + 一份 scheduler 文件”，按阶段跑完整个小红书内容工作流，并最终产出一个 pack 目录；目录里会留下草稿内容、封面素材、审核结果、发布结果和运行历史。
+
+Typical input:
+
+- one scheduler JSON
+- one packs root directory
+- optionally one existing pack directory
+- optionally one real cover image
+
+Typical output:
+
+- `brief.md`
+- `title.txt`
+- `content.txt`
+- `hashtags.txt`
+- `research.md` and `research.json`
+- `assets/cover.png` and `assets/manifest.json`
+- `review_report.json`
+- `publish_result.json`
+- `agent_runs.json`
+- `workflow_state.json`
+
+典型输入：
+
+- 一份 scheduler JSON
+- 一个 packs 根目录
+- 可选，一个已有的 pack 目录
+- 可选，一张真实封面图
+
+典型输出：
+
+- `brief.md`
+- `title.txt`
+- `content.txt`
+- `hashtags.txt`
+- `research.md` 和 `research.json`
+- `assets/cover.png` 和 `assets/manifest.json`
+- `review_report.json`
+- `publish_result.json`
+- `agent_runs.json`
+- `workflow_state.json`
+
+If it succeeds in `save_draft` mode, the result is not just “some text was generated”. The result is a complete, inspectable working folder for one XiaoHongShu post.
+
+如果它以 `save_draft` 模式成功结束，结果不只是“生成了一段文案”，而是得到了一整个可检查、可续跑的小红书内容工作目录。
+
 
 ## What This Project Is
 
@@ -54,6 +106,44 @@ It is not trying to be:
 - 浏览器 profile 管理器
 - 凭证保险箱
 - 大而全的 prompt 集合
+
+## A Simple Mental Model
+
+Think of this project as:
+
+- a compiler from `scheduler.json` to `pack/`
+- plus a state machine that lets you resume after failure
+- plus a publisher boundary that can stop at draft instead of forcing final publish
+
+把这个项目理解成下面这样会更直观：
+
+- 一个把 `scheduler.json` 变成 `pack/` 的编译器
+- 外加一个失败后可续跑的状态机
+- 外加一个可以停在草稿而不是强制发布的 publisher 边界
+
+Example result directory:
+
+```text
+2026-03-14-developer-honest-share/
+├── brief.md
+├── title.txt
+├── content.txt
+├── hashtags.txt
+├── research.md
+├── research.json
+├── image_prompts.md
+├── review_report.json
+├── publish_result.json
+├── workflow_state.json
+├── agent_runs.json
+└── assets/
+    ├── cover.png
+    └── manifest.json
+```
+
+That directory is the product of the workflow.
+
+这个目录本身，就是 workflow 的产物。
 
 ## What This Repo Owns
 
