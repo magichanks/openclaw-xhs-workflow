@@ -8,6 +8,14 @@
     "pattern": "YYYY-MM-DD-topic-slug",
     "topic_slug": "feature-launch-share"
   },
+  "research_policy": {
+    "adapter": "mock",
+    "limit": 5
+  },
+  "copy_policy": {
+    "adapter": "mock",
+    "language": "zh-CN"
+  },
   "publish_policy": {
     "target_time_local": "14:00",
     "strategy": "fill_then_publish",
@@ -21,6 +29,9 @@
     "required_role": "cover",
     "required_output": "assets/cover.png",
     "forbid_detail_images": true
+  },
+  "review_policy": {
+    "adapter": "validator"
   },
   "topic": "Announce a new feature with one clear user-facing value",
   "audience": [

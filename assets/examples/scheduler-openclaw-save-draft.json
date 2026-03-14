@@ -9,11 +9,11 @@
     "topic_slug": "developer-honest-share"
   },
   "research_policy": {
-    "adapter": "mock",
+    "adapter": "openclaw",
     "limit": 5
   },
   "copy_policy": {
-    "adapter": "mock",
+    "adapter": "openclaw",
     "language": "zh-CN"
   },
   "publish_policy": {
@@ -25,24 +25,31 @@
     "require_preflight_ok": true
   },
   "image_policy": {
+    "adapter": "source-file",
     "count": 1,
     "required_role": "cover",
     "required_output": "assets/cover.png",
+    "source_file": "./source-assets/cover.png",
     "forbid_detail_images": true
   },
   "review_policy": {
-    "adapter": "validator"
+    "adapter": "openclaw"
   },
-  "topic": "Share a developer perspective honestly and without overclaiming",
+  "openclaw": {
+    "agent": "main",
+    "session_id": "xhs-workflow",
+    "thinking": "medium"
+  },
+  "topic": "As a developer, share honestly why workflow reliability matters more than demo polish",
   "audience": [
     "developers",
     "AI product builders"
   ],
-  "core_value": "Explain that workflow reliability and human handoff matter more than demo polish",
+  "core_value": "Explain that failure recovery, review, and human handoff are part of the product",
   "cta": "Invite readers to discuss the last-mile problems they face",
   "keywords": [
     "developer workflow",
-    "AI product delivery",
-    "draft first publishing"
+    "AI delivery",
+    "last mile"
   ]
 }

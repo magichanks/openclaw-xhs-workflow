@@ -10,14 +10,16 @@ This skill manages a XiaoHongShu workflow as a stable pack contract instead of a
 Use it when the task is to:
 
 - create a new pack from a scheduler
-- run or resume a pack workflow
+- run or resume a full pack workflow
 - validate a pack before review or publishing
 - save a completed pack to draft or publish through a configured adapter
 
-For the current MVP, the strongest path is:
+For the current engine, the strongest path is:
 
-- let your existing OpenClaw/business workflow generate and review the pack first
-- then use this skill to run the publisher stage in `save_draft` or `publish` mode
+- let OpenClaw or mock adapters handle `research` and `copy`
+- let `mock` or `source-file` handle `image`
+- let `validator` or OpenClaw handle `review`
+- let a publisher adapter handle `save_draft` or `publish`
 
 ## Rules
 
@@ -26,20 +28,21 @@ For the current MVP, the strongest path is:
 - Respect `mode` and `publish_policy`; do not publish when the scheduler forbids it.
 - On failure, write the failure back to `workflow_state.json`, `publish_result.json`, and `agent_runs.json`.
 - Prefer `save_draft` as the default publisher path unless the scheduler explicitly allows publish.
-- Assume the pack is already review-approved before running the real publisher stage.
+- If `--start-at` is later than `research`, treat the existing pack files as source of truth.
 
 ## Workflow
 
 1. Create or resolve the pack directory with `scripts/scaffold_pack.sh` or an existing `pack_dir`.
 2. Read the scheduler contract in `references/scheduler_schema.md`.
-3. Advance the pack through the state machine in `references/state_machine.md`.
-4. Validate the pack before review/publish with `scripts/xhs_pack_validate.py`.
-5. Use the configured publisher adapter only for publisher-stage actions.
+3. Run `research -> copy -> image -> review`.
+4. If `mode` is not `prepare_only`, run the configured publisher path.
+5. Persist all stage outputs and status transitions back into the pack.
 
 For OpenClaw users, this usually means:
 
-1. Your business repo or agent prepares the pack.
-2. This skill owns the stable pack validation + publisher transition.
+1. Your business repo provides scheduler files and any source assets.
+2. This skill owns the stable workflow contract and stage transitions.
+3. You can resume from a specific stage by passing `--start-at`.
 
 ## Resources
 
