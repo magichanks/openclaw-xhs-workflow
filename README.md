@@ -356,6 +356,9 @@ Use it as the shortest runnable path. It:
 - `openclaw`
   - uses OpenClaw for content and publisher stages
   - image input comes from `--source-file` or the example cover
+- `openclaw-images`
+  - uses OpenClaw for content, image, and publisher stages
+  - the image stage consumes the prompt written during `copy`
 - `openai-images`
   - same as `openclaw`, but image generation uses OpenAI
 - `gemini-images`
@@ -369,6 +372,9 @@ Use it as the shortest runnable path. It:
 - `openclaw`
   - 内容和 publisher 阶段走 OpenClaw
   - 图片来自 `--source-file` 或示例封面
+- `openclaw-images`
+  - 内容、图片和 publisher 阶段都走 OpenClaw
+  - 图片阶段会直接消费 `copy` 阶段写出的提示词
 - `openai-images`
   - 与 `openclaw` 类似，但图片生成走 OpenAI
 - `gemini-images`

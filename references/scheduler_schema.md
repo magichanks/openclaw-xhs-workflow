@@ -52,7 +52,7 @@ Controls how the cover asset and `assets/manifest.json` are produced.
 
 Required fields:
 
-- `adapter`: `mock` or `source-file`
+- `adapter`: `mock`, `source-file`, `openclaw-images`, `openai-images`, or `gemini-images`
 - `required_output`
 - `required_role`
 - `count`
@@ -60,6 +60,7 @@ Required fields:
 Optional fields:
 
 - `source_file`: required when `adapter=source-file`
+- `image_agent`: optional OpenClaw image agent name when `adapter=openclaw-images`
 - `model`: used by `openai-images` or `gemini-images`
 - `size`: used by `openai-images`
 - `quality`: optional for `openai-images`

@@ -16,6 +16,7 @@ from pathlib import Path
 from typing import Any, Optional
 
 from adapters.openclaw_agent import OpenClawAgentClient, OpenClawConfig
+from adapters.image_openclaw import OpenClawImageContext, generate_image as generate_openclaw_image
 from adapters.image_gemini import GeminiImageConfig, generate_image as generate_gemini_image
 from adapters.image_openai import OpenAIImageConfig, generate_image as generate_openai_image
 from adapters.publisher_openclaw import OpenClawPublisherAdapter, PublisherOpenClawContext
@@ -321,6 +322,14 @@ def resolve_openclaw_client(scheduler: dict[str, Any], cwd: Path) -> OpenClawAge
             cwd=cwd,
         )
     )
+
+
+def resolve_openclaw_image_client(scheduler: dict[str, Any], cwd: Path, policy: dict[str, Any]) -> OpenClawAgentClient:
+    config = dict(scheduler.get("openclaw", {}))
+    image_agent = str(policy.get("image_agent") or os.environ.get("XHS_OPENCLAW_IMAGE_AGENT") or "").strip()
+    if image_agent:
+        config["agent"] = image_agent
+    return resolve_openclaw_client({"openclaw": config}, cwd)
 
 
 def resolve_publisher_adapter(name: str):
@@ -634,6 +643,17 @@ def run_image_stage(ctx: WorkflowContext) -> None:
             raise SystemExit(f"image source file does not exist: {source_path}")
         shutil.copyfile(source_path, output_path)
         create_manifest(ctx.pack_dir, output_rel, "source-file", prompt_hash, "generated")
+    elif adapter == "openclaw-images":
+        image_client = resolve_openclaw_image_client(ctx.scheduler, ctx.packs_root, policy)
+        meta = generate_openclaw_image(
+            image_client,
+            OpenClawImageContext(
+                pack_dir=str(ctx.pack_dir),
+                output_path=str(output_path),
+            ),
+            prompt,
+        )
+        create_manifest(ctx.pack_dir, output_rel, str(meta.get("model", "openclaw-images")), prompt_hash, str(meta.get("status", "generated")))
     elif adapter == "openai-images":
         api_key_env = str(policy.get("api_key_env", "")).strip()
         api_key = os.environ.get(api_key_env, "").strip() if api_key_env else ""

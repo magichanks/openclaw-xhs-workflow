@@ -16,7 +16,8 @@ Use this rollout order and do not skip ahead:
 
 1. `mock`
 2. `openclaw` with `source-file`
-3. `openai-images` or `gemini-images`
+3. `openclaw-images`
+4. `openai-images` or `gemini-images`
 
 推荐 rollout 顺序，不要跳步：
 
@@ -28,7 +29,8 @@ Why:
 
 - `mock` proves the workflow engine
 - `source-file` proves your real pack can carry one real cover image
-- real image APIs are the last variable, not the first
+- `openclaw-images` reuses image generation already configured inside OpenClaw
+- direct image APIs are the last variable, not the first
 
 原因：
 
@@ -106,11 +108,25 @@ Use when:
 - 让 OpenClaw 执行 publisher 动作
 - 你能提供一张明确的封面图
 
+### `openclaw-images`
+
+Use when:
+
+- your OpenClaw already has image generation configured
+- you want the image stage to use the prompt produced during `copy`
+- you do not want to duplicate image API setup here
+
+适用场景：
+
+- 你的 OpenClaw 已经配置好了图片生成
+- 你希望图片阶段直接使用 `copy` 产出的提示词
+- 你不想在这里重复配置图像 API
+
 ### `openai-images` / `gemini-images`
 
-Use only after `openclaw + source-file` works.
+Use only after `openclaw + source-file` or `openclaw-images` works.
 
-只在 `openclaw + source-file` 跑通之后再打开。
+只在 `openclaw + source-file` 或 `openclaw-images` 跑通之后再打开。
 
 ## What OpenClaw Should Do
 

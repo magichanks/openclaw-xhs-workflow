@@ -48,7 +48,7 @@ def build_checks(profile: str, source_file: Optional[str]) -> list[dict[str, obj
         )
         return checks
 
-    needs_openclaw = profile in {"openclaw", "openai-images", "gemini-images"}
+    needs_openclaw = profile in {"openclaw", "openclaw-images", "openai-images", "gemini-images"}
     if needs_openclaw:
         checks.append(
             {
@@ -105,7 +105,7 @@ def build_checks(profile: str, source_file: Optional[str]) -> list[dict[str, obj
 
 def main() -> None:
     parser = argparse.ArgumentParser(description="Check local environment for openclaw-xhs-workflow.")
-    parser.add_argument("--profile", choices=["mock", "openclaw", "openai-images", "gemini-images"], default="mock")
+    parser.add_argument("--profile", choices=["mock", "openclaw", "openclaw-images", "openai-images", "gemini-images"], default="mock")
     parser.add_argument("--source-file", help="Optional cover image path for the openclaw/source-file profile.")
     parser.add_argument("--strict", action="store_true", help="Exit non-zero when any required check fails.")
     parser.add_argument("--json", action="store_true", help="Print machine-readable JSON.")

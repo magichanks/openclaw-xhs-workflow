@@ -6,6 +6,7 @@ This workflow supports multiple image-generation paths for the `image` stage.
 
 - `mock`
 - `source-file`
+- `openclaw-images`
 - `openai-images`
 - `gemini-images`
 
@@ -51,7 +52,57 @@ Scheduler example:
 - an absolute path
 - a path relative to `--packs-root`
 
-## 3. `openai-images`
+## 3. `openclaw-images`
+
+Use this when OpenClaw itself already has image generation configured and you want the workflow to reuse that capability.
+
+### Required environment
+
+- `OPENCLAW_BIN` or `openclaw` on `PATH`
+- `XHS_OPENCLAW_AGENT` or `openclaw.agent` in the scheduler
+
+Optional:
+
+```bash
+export XHS_OPENCLAW_IMAGE_AGENT="image-agent-name"
+```
+
+Scheduler example:
+
+```json
+{
+  "image_policy": {
+    "adapter": "openclaw-images",
+    "required_output": "assets/cover.png",
+    "required_role": "cover",
+    "count": 1
+  }
+}
+```
+
+Optional scheduler override:
+
+```json
+{
+  "image_policy": {
+    "adapter": "openclaw-images",
+    "image_agent": "image-agent-name"
+  }
+}
+```
+
+Prompt source:
+
+- `copy` writes `image_prompts.md`
+- `image` reads the `- Prompt:` line from that file
+- OpenClaw is asked to generate exactly one cover image at `assets/cover.png`
+
+Use this when:
+
+- the user already manages image API credentials inside OpenClaw
+- you want one less API setup surface in this repo
+
+## 4. `openai-images`
 
 Use this for the OpenAI Images API or an OpenAI-compatible image gateway.
 
@@ -104,7 +155,7 @@ This adapter is a good default for:
 - OpenAI Images API
 - most OpenAI-compatible image gateways
 
-## 4. `gemini-images`
+## 5. `gemini-images`
 
 Use this when your team already runs image generation through Gemini.
 
@@ -151,6 +202,7 @@ For most users, the lowest-risk progression is:
 
 1. Start with `mock`
 2. Move to `source-file`
-3. Move to `openai-images` or `gemini-images`
+3. Move to `openclaw-images` if OpenClaw already owns image generation
+4. Move to `openai-images` or `gemini-images` if this repo should call the image API directly
 
 This keeps the workflow stable while you set up model credentials and prompt tuning.

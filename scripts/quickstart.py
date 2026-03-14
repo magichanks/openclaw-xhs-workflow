@@ -24,6 +24,7 @@ PYTHON_BIN = os.environ.get("XHS_PYTHON_BIN", "/usr/bin/python3")
 PROFILE_TO_SCHEDULER = {
     "mock": EXAMPLES_DIR / "scheduler-save-draft.json",
     "openclaw": EXAMPLES_DIR / "scheduler-openclaw-save-draft.json",
+    "openclaw-images": EXAMPLES_DIR / "scheduler-openclaw-images-save-draft.json",
     "openai-images": EXAMPLES_DIR / "scheduler-openai-images-save-draft.json",
     "gemini-images": EXAMPLES_DIR / "scheduler-gemini-images-save-draft.json",
 }
@@ -52,7 +53,7 @@ def prepare_scheduler(profile: str, source_file: Optional[str]) -> Path:
 
 def main() -> None:
     parser = argparse.ArgumentParser(description="Run the shortest successful path for openclaw-xhs-workflow.")
-    parser.add_argument("--profile", choices=["mock", "openclaw", "openai-images", "gemini-images"], default="mock")
+    parser.add_argument("--profile", choices=["mock", "openclaw", "openclaw-images", "openai-images", "gemini-images"], default="mock")
     parser.add_argument("--date", default=str(date.today()), help="Pack date in YYYY-MM-DD.")
     parser.add_argument("--packs-root", default="./tmp-packs", help="Where generated packs should be created.")
     parser.add_argument("--mode", choices=["save_draft", "publish"], default="save_draft")
