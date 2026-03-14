@@ -19,7 +19,7 @@ For the current engine, the strongest path is:
 - let OpenClaw or mock adapters handle `research` and `copy`
 - let `mock`, `source-file`, `openai-images`, or `gemini-images` handle `image`
 - let `validator` or OpenClaw handle `review`
-- let a publisher adapter handle `save_draft` or `publish`
+- let a publisher adapter handle `save_draft` or `publish`, preferably `openclaw`
 
 ## Rules
 

@@ -4,11 +4,11 @@ This guide is for users who already work inside OpenClaw and want to get this wo
 
 这份指南面向已经在使用 OpenClaw 的用户，目标是用最少的变量把这套 workflow 跑起来。
 
-## Why The Guide Defaults To `codex-cli` Publisher
+## Why The Guide Defaults To `openclaw` Publisher
 
-The guide currently recommends `codex-cli` as the real publisher path for one practical reason:
+The guide now recommends `openclaw` as the default real publisher path for one practical reason:
 
-- in this repository, the only implemented real publisher adapter today is `codex-cli`
+- it lets users keep publisher execution inside their own OpenClaw AI and tooling environment
 
 This is not an architectural restriction.
 
@@ -20,11 +20,11 @@ The architecture only requires a publisher adapter contract:
 - `click-publish`
 - `save-draft`
 
-If another publisher adapter is implemented later, the guide should be updated to include it.
+If another real publisher adapter is implemented later, the guide should be updated to include it.
 
-现在这份指南默认推荐 `codex-cli` 作为真实 publisher 路径，原因只有一个：
+现在这份指南默认推荐 `openclaw` 作为真实 publisher 路径，原因也很直接：
 
-- 当前仓库里，唯一已经实现的“真实 publisher adapter”就是 `codex-cli`
+- 它可以把 publisher 执行留在用户自己的 OpenClaw AI 和工具环境里
 
 这不是架构限制。
 
@@ -36,7 +36,7 @@ If another publisher adapter is implemented later, the guide should be updated t
 - `click-publish`
 - `save-draft`
 
-以后如果补上别的真实 publisher adapter，这份指南也应该同步扩展，而不是继续只写 `codex-cli`。
+以后如果补上别的真实 publisher adapter，这份指南也应该继续扩展。
 
 ## Recommended Rollout / 推荐接入顺序
 
@@ -47,7 +47,7 @@ Use this order:
 1. `mock` everywhere
 2. `source-file` for image
 3. `openclaw` for research/copy/review
-4. a real publisher adapter, currently `codex-cli`
+4. the real publisher adapter, `openclaw`
 5. `openai-images` or `gemini-images` for image generation
 
 That order isolates failures and makes debugging much faster.
@@ -59,7 +59,7 @@ That order isolates failures and makes debugging much faster.
 1. 全部先用 `mock`
 2. 图片先切到 `source-file`
 3. research/copy/review 再切到 `openclaw`
-4. publisher 再切到真实 adapter，目前就是 `codex-cli`
+4. publisher 再切到真实 adapter，也就是 `openclaw`
 5. 最后再接 `openai-images` 或 `gemini-images`
 
 这个顺序能把故障面拆开，排错会快很多。
@@ -210,8 +210,9 @@ Only do this after you have verified:
 Then set:
 
 ```bash
-XHS_PUBLISHER_ADAPTER=codex-cli
-XHS_SKILL_ROOT="$HOME/.codex/skills/xiaohongshu-skills"
+XHS_PUBLISHER_ADAPTER=openclaw
+XHS_PUBLISHER_OPENCLAW_AGENT=main
+XHS_PUBLISHER_OPENCLAW_SESSION_ID=xhs-workflow-publisher
 ```
 
 Recommended first command:
@@ -224,7 +225,7 @@ Recommended first command:
   --start-at publisher \
   --pack-dir ./packs/2026-03-14-developer-honest-share \
   --mode save_draft \
-  --publisher-adapter codex-cli
+  --publisher-adapter openclaw
 ```
 
 That keeps the risk low because you are only testing publisher-stage integration.
@@ -301,16 +302,16 @@ Check:
 
 Check:
 
-- `XHS_PUBLISHER_ADAPTER=codex-cli`
-- `XHS_SKILL_ROOT`
+- `XHS_PUBLISHER_ADAPTER=openclaw`
+- `XHS_PUBLISHER_OPENCLAW_AGENT`
 - your XiaoHongShu browser/login environment
 
 ### 2. Publisher 阶段提示未登录
 
 检查：
 
-- `XHS_PUBLISHER_ADAPTER=codex-cli`
-- `XHS_SKILL_ROOT`
+- `XHS_PUBLISHER_ADAPTER=openclaw`
+- `XHS_PUBLISHER_OPENCLAW_AGENT`
 - 小红书浏览器/登录环境是否可用
 
 ### 3. Image stage fails before generation
@@ -355,7 +356,7 @@ For most users, this is the safest first production-shaped combination:
 - `copy_policy.adapter = openclaw`
 - `image_policy.adapter = source-file`
 - `review_policy.adapter = validator`
-- `publisher-adapter = codex-cli`
+- `publisher-adapter = openclaw`
 
 That keeps the fragile parts separated:
 
@@ -370,7 +371,7 @@ That keeps the fragile parts separated:
 - `copy_policy.adapter = openclaw`
 - `image_policy.adapter = source-file`
 - `review_policy.adapter = validator`
-- `publisher-adapter = codex-cli`
+- `publisher-adapter = openclaw`
 
 这样能把脆弱点拆开：
 

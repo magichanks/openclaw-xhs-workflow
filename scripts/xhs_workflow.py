@@ -18,12 +18,11 @@ from typing import Any
 from adapters.openclaw_agent import OpenClawAgentClient, OpenClawConfig
 from adapters.image_gemini import GeminiImageConfig, generate_image as generate_gemini_image
 from adapters.image_openai import OpenAIImageConfig, generate_image as generate_openai_image
-from adapters.xhs_codex_cli import CodexCliPublisherAdapter, PublisherConfig
+from adapters.publisher_openclaw import OpenClawPublisherAdapter, PublisherOpenClawContext
 from adapters.xhs_mock_publisher import MockPublisherAdapter
 
 
 SCRIPT_DIR = Path(__file__).resolve().parent
-DEFAULT_SKILL_ROOT = Path.home() / ".codex/skills/xiaohongshu-skills"
 STAGE_ORDER = ["research", "copy", "image", "review", "publisher"]
 MOCK_PNG_HEX = (
     "89504e470d0a1a0a0000000d4948445200000001000000010804000000b51c0c02"
@@ -327,17 +326,17 @@ def resolve_publisher_adapter(name: str):
     adapter_name = (name or os.environ.get("XHS_PUBLISHER_ADAPTER", "mock")).strip()
     if adapter_name == "mock":
         return MockPublisherAdapter(), "mock"
-    if adapter_name == "codex-cli":
-        skill_root_text = os.environ.get("XHS_SKILL_ROOT", "").strip()
-        skill_root = Path(skill_root_text).expanduser().resolve() if skill_root_text else DEFAULT_SKILL_ROOT
-        cli_text = os.environ.get("XHS_PUBLISHER_CLI", "").strip()
-        cli_path = Path(cli_text).expanduser().resolve() if cli_text else skill_root / "scripts/cli.py"
-        if not cli_path.exists():
-            raise SystemExit(
-                "Publisher CLI not found. Set XHS_PUBLISHER_CLI or XHS_SKILL_ROOT to a valid installation."
-            )
-        return CodexCliPublisherAdapter(PublisherConfig(skill_root=skill_root, cli_path=cli_path)), "codex-cli"
-    raise SystemExit(f"Unsupported publisher adapter: {adapter_name}")
+    if adapter_name == "openclaw":
+        openclaw_scheduler = {
+            "openclaw": {
+                "agent": os.environ.get("XHS_PUBLISHER_OPENCLAW_AGENT", os.environ.get("XHS_OPENCLAW_AGENT", "main")),
+                "session_id": os.environ.get("XHS_PUBLISHER_OPENCLAW_SESSION_ID", os.environ.get("XHS_OPENCLAW_SESSION_ID", "xhs-workflow-publisher")),
+                "thinking": os.environ.get("XHS_PUBLISHER_OPENCLAW_THINKING", os.environ.get("XHS_OPENCLAW_THINKING", "medium")),
+            }
+        }
+        client = resolve_openclaw_client(openclaw_scheduler, SCRIPT_DIR.parent)
+        return OpenClawPublisherAdapter(client, PublisherOpenClawContext(pack_dir="", mode="")), "openclaw"
+    raise SystemExit(f"Unsupported publisher adapter: {adapter_name}. Supported: mock, openclaw")
 
 
 def build_fill_args(pack_dir: Path, scheduler: dict[str, Any]) -> list[str]:
@@ -765,6 +764,9 @@ Rules:
 
 def run_publisher_stage(ctx: WorkflowContext) -> None:
     adapter, resolved_adapter_name = resolve_publisher_adapter(ctx.publisher_adapter_name)
+    if isinstance(adapter, OpenClawPublisherAdapter):
+        adapter.context.pack_dir = str(ctx.pack_dir)
+        adapter.context.mode = ctx.mode
     ensure_review_approved(ctx.pack_dir, ctx.scheduler)
     validate_pack(ctx.pack_dir, "publish")
 

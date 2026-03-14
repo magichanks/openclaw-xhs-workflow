@@ -212,11 +212,9 @@ Minimum assumptions:
 - OpenClaw available when you want to invoke the workflow through OpenClaw
 - a publisher adapter implementation if you want to fill/save/publish for real
 
-If you use the codex-cli publisher adapter, you also need:
+If you use a real publisher adapter, you will use:
 
-- `uv`
-- a local installation of the XiaoHongShu automation skill/CLI
-- a valid browser/login environment
+- `openclaw` to delegate publisher actions to the user's own OpenClaw AI and installed tooling
 
 If you use real image adapters, you will also need:
 
@@ -230,11 +228,9 @@ If you use real image adapters, you will also need:
 - 如果要通过 OpenClaw 调度，则需要 OpenClaw 可用
 - 如果要真实 fill/save/publish，则需要可用的 publisher adapter
 
-如果使用 codex-cli publisher adapter，还需要：
+如果使用真实 publisher adapter，就走：
 
-- `uv`
-- 本地安装好的小红书自动化 skill/CLI
-- 可用的浏览器与登录环境
+- `openclaw`，把 publisher 动作委托给用户自己的 OpenClaw AI 和已安装工具链
 
 如果使用真实图像 adapter，还需要：
 
@@ -317,7 +313,7 @@ Built-in stage adapters:
 - `copy_policy.adapter`: `mock` or `openclaw`
 - `image_policy.adapter`: `mock`, `source-file`, `openai-images`, or `gemini-images`
 - `review_policy.adapter`: `validator` or `openclaw`
-- `publisher-adapter`: `mock` or `codex-cli`
+- `publisher-adapter`: `mock` or `openclaw`
 
 内置阶段 adapter：
 
@@ -325,7 +321,7 @@ Built-in stage adapters:
 - `copy_policy.adapter`：`mock` 或 `openclaw`
 - `image_policy.adapter`：`mock`、`source-file`、`openai-images` 或 `gemini-images`
 - `review_policy.adapter`：`validator` 或 `openclaw`
-- `publisher-adapter`：`mock` 或 `codex-cli`
+- `publisher-adapter`：`mock` 或 `openclaw`
 
 ### Image adapter setup
 
@@ -426,7 +422,7 @@ If the user already works inside OpenClaw, the recommended production-shaped pat
 - `copy_policy.adapter=openclaw`
 - `image_policy.adapter=source-file`
 - `review_policy.adapter=openclaw` or `validator`
-- `publisher-adapter=codex-cli`
+- `publisher-adapter=openclaw`
 
 Use the bundled example scheduler as a template:
 
@@ -443,13 +439,13 @@ If you want to pair OpenClaw with a real image API, duplicate that scheduler and
 - `copy_policy.adapter=openclaw`
 - `image_policy.adapter=source-file`
 - `review_policy.adapter=openclaw` 或 `validator`
-- `publisher-adapter=codex-cli`
+- `publisher-adapter=openclaw`
 
 可以用下面这个示例 scheduler 作为模板：
 
 - `assets/examples/scheduler-openclaw-save-draft.json`
 
-### Run a real `save_draft` flow with OpenClaw + codex-cli
+### Run a real `save_draft` flow with OpenClaw as the publisher adapter
 
 Prerequisites:
 
@@ -459,8 +455,9 @@ Prerequisites:
 - the login/browser environment is valid
 
 ```bash
-export XHS_PUBLISHER_ADAPTER=codex-cli
-export XHS_SKILL_ROOT="$HOME/.codex/skills/xiaohongshu-skills"
+export XHS_PUBLISHER_ADAPTER=openclaw
+export XHS_PUBLISHER_OPENCLAW_AGENT=main
+export XHS_PUBLISHER_OPENCLAW_SESSION_ID=xhs-workflow-publisher
 
 python3 scripts/xhs_workflow.py \
   --packs-root ./packs \
@@ -469,7 +466,7 @@ python3 scripts/xhs_workflow.py \
   --pack-dir ./packs/2026-03-14-developer-honest-share \
   --start-at research \
   --mode save_draft \
-  --publisher-adapter codex-cli
+  --publisher-adapter openclaw
 ```
 
 Success means:
@@ -517,7 +514,7 @@ Inputs:
 - pack dir: /abs/path/to/packs/2026-03-14-developer-honest-share
 - start_at: research
 - mode: save_draft
-- publisher adapter: codex-cli
+- publisher adapter: openclaw
 
 Rules:
 - Read the scheduler first.
