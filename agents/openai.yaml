@@ -1,7 +1,7 @@
 interface:
   display_name: "OpenClaw XHS Workflow"
-  short_description: "Run reviewable XiaoHongShu pack workflows with draft-first publishing."
-  default_prompt: "Use $openclaw-xhs-workflow to create or resume a XiaoHongShu content pack from a scheduler and stop at save draft unless publish is explicitly allowed."
+  short_description: "OpenClaw plugin for XiaoHongShu automation, AI content workflow, image generation, and draft-first publishing."
+  default_prompt: "Use $openclaw-xhs-workflow to create or resume a XiaoHongShu content pack, generate copy and cover image, review it, and stop at save draft unless publish is explicitly allowed."
 
 policy:
   allow_implicit_invocation: true

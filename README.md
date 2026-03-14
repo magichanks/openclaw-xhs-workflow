@@ -2,6 +2,8 @@
 
 Turn one topic into a reviewable, resumable XiaoHongShu post pack.
 
+An OpenClaw plugin for XiaoHongShu automation, AI content workflow, cover image generation, review, and draft-first publishing.
+
 `research -> copy -> image -> review -> publisher`
 
 把一个选题变成一套可检查、可续跑、可存草稿的小红书内容包。
@@ -38,9 +40,31 @@ This path needs:
 - 浏览器 profile
 - publisher 登录
 
+## Use Cases
+
+This project is a good fit if you are looking for:
+
+- XiaoHongShu automation
+- XiaoHongShu content workflow
+- AI-assisted Xiaohongshu copywriting
+- draft-first Xiaohongshu publishing
+- OpenClaw content operations
+- OpenClaw image-generation workflow
+
+如果你在找这些方向，它会比较合适：
+
+- 小红书自动化
+- 小红书内容工作流
+- AI 辅助小红书文案生成
+- 先存草稿的小红书发布流程
+- OpenClaw 内容运营流程
+- OpenClaw 配图工作流
+
 ## What This Project Does
 
 This repo is a workflow layer for one XiaoHongShu post.
+
+It is designed as a reusable OpenClaw plugin and XiaoHongShu publishing workflow, not just a one-off prompt template.
 
 Give it one topic, and it will:
 
@@ -185,6 +209,10 @@ If your first real run should stay simple, provide one explicit cover image:
 Use the `openclaw-images` path. The image stage will consume the prompt written during `copy` and ask OpenClaw to generate the cover image.
 
 如果 OpenClaw 本身已经接好了图像生成，就用 `openclaw-images` 路径。图片阶段会直接消费 `copy` 写出的提示词，并让 OpenClaw 生成封面。
+
+This is useful for users who already have OpenClaw connected to OpenAI Images, Gemini image generation, or another image-capable provider.
+
+这对那些已经把 OpenClaw 接到 OpenAI Images、Gemini 图像生成或其他图像能力提供方的用户尤其合适。
 
 ## Supported Profiles
 
