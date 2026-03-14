@@ -1,0 +1,36 @@
+{
+  "version": 1,
+  "slot": "manual",
+  "timezone": "Asia/Shanghai",
+  "active": true,
+  "mode": "publish",
+  "pack_naming": {
+    "pattern": "YYYY-MM-DD-topic-slug",
+    "topic_slug": "feature-launch-share"
+  },
+  "publish_policy": {
+    "target_time_local": "14:00",
+    "strategy": "fill_then_publish",
+    "allow_publish": true,
+    "save_draft": false,
+    "require_review_approved": true,
+    "require_preflight_ok": true
+  },
+  "image_policy": {
+    "count": 1,
+    "required_role": "cover",
+    "required_output": "assets/cover.png",
+    "forbid_detail_images": true
+  },
+  "topic": "Announce a new feature with one clear user-facing value",
+  "audience": [
+    "operators",
+    "store owners"
+  ],
+  "core_value": "Keep the post narrow and verifiable",
+  "cta": "Invite readers to ask for a demo",
+  "keywords": [
+    "feature launch",
+    "merchant workflow"
+  ]
+}

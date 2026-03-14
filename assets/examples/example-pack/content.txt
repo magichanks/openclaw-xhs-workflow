@@ -1,0 +1,5 @@
+The hard part is rarely the demo.
+
+The hard part is making the workflow survive edge cases, retries, and human handoff without losing the user.
+
+That is the part worth sharing honestly.
