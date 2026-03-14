@@ -2,7 +2,7 @@
 name = "openclaw-xhs-workflow"
 version = "0.1.0"
 description = "OpenClaw workflow plugin for XiaoHongShu content packs"
-requires-python = ">=3.10"
+requires-python = ">=3.9"
 
 [tool.setuptools]
 py-modules = []

@@ -7,7 +7,7 @@ import base64
 import json
 import urllib.request
 from dataclasses import dataclass
-from typing import Any
+from typing import Any, Optional
 
 
 @dataclass
@@ -16,8 +16,8 @@ class OpenAIImageConfig:
     base_url: str
     model: str
     size: str
-    quality: str | None = None
-    background: str | None = None
+    quality: Optional[str] = None
+    background: Optional[str] = None
 
 
 def _post_json(url: str, payload: dict[str, Any], api_key: str) -> dict[str, Any]:

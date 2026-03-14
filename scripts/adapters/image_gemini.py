@@ -7,7 +7,7 @@ import base64
 import json
 import urllib.request
 from dataclasses import dataclass
-from typing import Any
+from typing import Any, Optional
 
 
 @dataclass
@@ -15,8 +15,8 @@ class GeminiImageConfig:
     api_key: str
     base_url: str
     model: str
-    aspect_ratio: str | None = None
-    image_size: str | None = None
+    aspect_ratio: Optional[str] = None
+    image_size: Optional[str] = None
 
 
 def _post_json(url: str, payload: dict[str, Any], api_key: str) -> dict[str, Any]:

@@ -76,11 +76,15 @@ Key directories:
 Setup entrypoints:
 
 - `.env.example`
+- `scripts/check_env.py`
+- `scripts/quickstart.py`
 - `references/openclaw_setup_guide.md`
 
 接入入口：
 
 - `.env.example`
+- `scripts/check_env.py`
+- `scripts/quickstart.py`
 - `references/openclaw_setup_guide.md`
 
 ## Core Concepts
@@ -207,7 +211,7 @@ Not fully implemented yet:
 
 Minimum assumptions:
 
-- Python 3.10+
+- Python 3.9+
 - a Unix-like shell for `scripts/scaffold_pack.sh`
 - OpenClaw available when you want to invoke the workflow through OpenClaw
 - a publisher adapter implementation if you want to fill/save/publish for real
@@ -223,7 +227,7 @@ If you use real image adapters, you will also need:
 
 最小环境前提：
 
-- Python 3.10+
+- Python 3.9+
 - 可运行 `scripts/scaffold_pack.sh` 的类 Unix shell
 - 如果要通过 OpenClaw 调度，则需要 OpenClaw 可用
 - 如果要真实 fill/save/publish，则需要可用的 publisher adapter
@@ -239,53 +243,63 @@ If you use real image adapters, you will also need:
 
 ## Quick Start
 
-Before the first real run, it is recommended to:
+The shortest path to a first successful run is:
 
 1. copy `.env.example` to `.env.local`
-2. read `references/openclaw_setup_guide.md`
-3. run the all-mock full flow once
+2. run `/usr/bin/python3 scripts/check_env.py --profile mock`
+3. run `/usr/bin/python3 scripts/quickstart.py --profile mock`
 
-第一次接入前，建议先做三步：
+最短的首次跑通路径是：
 
 1. 把 `.env.example` 复制成 `.env.local`
-2. 阅读 `references/openclaw_setup_guide.md`
-3. 先跑通一次全 mock 流程
-
-### 1. Create a pack
+2. 运行 `/usr/bin/python3 scripts/check_env.py --profile mock`
+3. 运行 `/usr/bin/python3 scripts/quickstart.py --profile mock`
 
 ```bash
-bash scripts/scaffold_pack.sh ./packs developer-honest-share 2026-03-14
+cp .env.example .env.local
+/usr/bin/python3 scripts/check_env.py --profile mock
+/usr/bin/python3 scripts/quickstart.py --profile mock
 ```
 
-### 2. Inspect or advance state
+That path requires no real image API, no browser profile, and no publisher login.
+
+这条路径不需要真实图像接口、不需要浏览器 profile，也不需要 publisher 登录态。
+
+### Fastest production-shaped path for OpenClaw users
+
+If you already use OpenClaw, keep the first real run simple:
 
 ```bash
-python3 scripts/xhs_pack_state.py show --pack-dir ./packs/2026-03-14-developer-honest-share
-python3 scripts/xhs_pack_state.py transition \
-  --pack-dir ./packs/2026-03-14-developer-honest-share \
-  --state reviewed \
-  --last-step review \
-  --content-status done \
-  --image-status done \
-  --review-status approved
+/usr/bin/python3 scripts/check_env.py --profile openclaw --source-file /abs/path/to/cover.png
+/usr/bin/python3 scripts/quickstart.py --profile openclaw --source-file /abs/path/to/cover.png
 ```
 
-### 3. Validate a pack
+If you omit `--source-file`, quickstart falls back to the bundled example cover so you can verify the full chain first.
+
+如果你已经在用 OpenClaw，第一次真实接入保持简单：
 
 ```bash
-python3 scripts/xhs_pack_validate.py \
-  --pack-dir ./packs/2026-03-14-developer-honest-share \
-  --profile draft
+/usr/bin/python3 scripts/check_env.py --profile openclaw --source-file /abs/path/to/cover.png
+/usr/bin/python3 scripts/quickstart.py --profile openclaw --source-file /abs/path/to/cover.png
 ```
 
-### 4. Build a manual run payload
+如果你暂时不传 `--source-file`，quickstart 会先回退到仓库内置示例封面，让你先验证整条链路。
 
-```bash
-python3 scripts/run_manual.py \
-  --scheduler-file assets/examples/scheduler-save-draft.json \
-  --date 2026-03-14 \
-  --extra "Write from a developer perspective and keep the tone honest."
-```
+### What `quickstart.py` does
+
+- automatically loads `.env.local` if present
+- runs `check_env.py --strict` before the workflow
+- selects the bundled scheduler template for the chosen profile
+- writes a temporary scheduler with safe defaults
+- runs `scripts/xhs_workflow.py` with the resolved command
+
+`quickstart.py` 会：
+
+- 如果存在，就自动加载 `.env.local`
+- 在 workflow 之前先执行 `check_env.py --strict`
+- 按所选 profile 选用内置 scheduler 模板
+- 生成一份带安全默认值的临时 scheduler
+- 再调用 `scripts/xhs_workflow.py`
 
 ## Full Flow
 
@@ -350,13 +364,7 @@ For most OpenClaw users, the recommended rollout is:
 This is the simplest fully local verification path. It starts from no existing pack and runs all five stages.
 
 ```bash
-python3 scripts/xhs_workflow.py \
-  --packs-root ./tmp-packs \
-  --scheduler-file assets/examples/scheduler-save-draft.json \
-  --date 2026-03-14 \
-  --start-at research \
-  --mode save_draft \
-  --publisher-adapter mock
+/usr/bin/python3 scripts/quickstart.py --profile mock
 ```
 
 That command should end with:
@@ -370,12 +378,7 @@ That command should end with:
 这是最简单的本地全流程验证路径。它从空 pack 开始，跑完五个阶段。
 
 ```bash
-python3 scripts/xhs_workflow.py \
-  --packs-root ./tmp-packs \
-  --scheduler-file assets/examples/scheduler-save-draft.json \
-  --date 2026-03-14 \
-  --start-at research \
-  --mode save_draft
+/usr/bin/python3 scripts/quickstart.py --profile mock
 ```
 
 它的预期输出应包含：
@@ -459,14 +462,9 @@ export XHS_PUBLISHER_ADAPTER=openclaw
 export XHS_PUBLISHER_OPENCLAW_AGENT=main
 export XHS_PUBLISHER_OPENCLAW_SESSION_ID=xhs-workflow-publisher
 
-python3 scripts/xhs_workflow.py \
-  --packs-root ./packs \
-  --scheduler-file assets/examples/scheduler-openclaw-save-draft.json \
-  --date 2026-03-14 \
-  --pack-dir ./packs/2026-03-14-developer-honest-share \
-  --start-at research \
-  --mode save_draft \
-  --publisher-adapter openclaw
+/usr/bin/python3 scripts/quickstart.py \
+  --profile openclaw \
+  --source-file /abs/path/to/cover.png
 ```
 
 Success means:

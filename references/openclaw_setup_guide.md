@@ -64,6 +64,22 @@ That order isolates failures and makes debugging much faster.
 
 这个顺序能把故障面拆开，排错会快很多。
 
+## Shortest Successful Path / 最短跑通路径
+
+Run these three commands first:
+
+先跑这三条命令：
+
+```bash
+cp .env.example .env.local
+/usr/bin/python3 scripts/check_env.py --profile mock
+/usr/bin/python3 scripts/quickstart.py --profile mock
+```
+
+That is the lowest-friction path. It verifies the workflow engine, pack state machine, and publisher contract before any real account setup.
+
+这是阻力最小的路径。它会在任何真实账号配置之前，先验证 workflow engine、pack 状态机和 publisher contract。
+
 ## Step 1: Copy The Environment Template / 先复制环境模板
 
 ```bash
@@ -87,7 +103,13 @@ XHS_OPENCLAW_THINKING=medium
 
 ## Step 2: Load The Environment / 加载环境变量
 
-In a shell:
+If you use `scripts/check_env.py` or `scripts/quickstart.py`, they load `.env.local` automatically.
+
+如果你使用 `scripts/check_env.py` 或 `scripts/quickstart.py`，它们会自动加载 `.env.local`。
+
+If you still want to load it manually:
+
+如果你仍然想手动加载：
 
 ```bash
 set -a
@@ -106,13 +128,8 @@ This does not require a real image API, browser profile, or publisher login.
 这一步不需要真实图像接口、不需要浏览器 profile，也不需要 publisher 登录态。
 
 ```bash
-/usr/bin/python3 scripts/xhs_workflow.py \
-  --packs-root ./tmp-packs \
-  --scheduler-file ./assets/examples/scheduler-save-draft.json \
-  --date 2026-03-14 \
-  --start-at research \
-  --mode save_draft \
-  --publisher-adapter mock
+/usr/bin/python3 scripts/check_env.py --profile mock
+/usr/bin/python3 scripts/quickstart.py --profile mock
 ```
 
 Expected result:
@@ -132,25 +149,20 @@ This is the safest first real-world step.
 这是最稳的第一步真实接入。
 
 1. Put a real cover image somewhere in your business repo.
-2. Copy `assets/examples/scheduler-openclaw-save-draft.json`.
-3. Set:
+2. Run `/usr/bin/python3 scripts/check_env.py --profile openclaw --source-file /abs/path/to/cover.png`.
+3. Run `/usr/bin/python3 scripts/quickstart.py --profile openclaw --source-file /abs/path/to/cover.png`.
 
 1. 在你的业务仓库里放一张真实封面图。
-2. 复制 `assets/examples/scheduler-openclaw-save-draft.json`。
-3. 改成：
+2. 运行 `/usr/bin/python3 scripts/check_env.py --profile openclaw --source-file /abs/path/to/cover.png`。
+3. 运行 `/usr/bin/python3 scripts/quickstart.py --profile openclaw --source-file /abs/path/to/cover.png`。
 
-```json
-{
-  "image_policy": {
-    "adapter": "source-file",
-    "source_file": "./source-assets/cover.png"
-  }
-}
-```
+If you omit `--source-file`, quickstart uses the bundled example cover first.
 
-Now the workflow remains deterministic, but the output image is real.
+如果你省略 `--source-file`，quickstart 会先使用仓库内置的示例封面。
 
-这样 workflow 仍然是确定性的，但图片已经变成真实输出。
+Now the workflow remains deterministic, but the image input can already be real.
+
+这样 workflow 仍然是确定性的，但图片输入已经可以是真实素材。
 
 ## Step 5: Turn On OpenClaw For Content Stages / 打开 OpenClaw 内容阶段
 
@@ -218,19 +230,13 @@ XHS_PUBLISHER_OPENCLAW_SESSION_ID=xhs-workflow-publisher
 Recommended first command:
 
 ```bash
-/usr/bin/python3 scripts/xhs_workflow.py \
-  --packs-root ./packs \
-  --scheduler-file ./assets/examples/scheduler-openclaw-save-draft.json \
-  --date 2026-03-14 \
-  --start-at publisher \
-  --pack-dir ./packs/2026-03-14-developer-honest-share \
-  --mode save_draft \
-  --publisher-adapter openclaw
+/usr/bin/python3 scripts/check_env.py --profile openclaw --source-file /abs/path/to/cover.png
+/usr/bin/python3 scripts/quickstart.py --profile openclaw --source-file /abs/path/to/cover.png
 ```
 
-That keeps the risk low because you are only testing publisher-stage integration.
+That keeps the risk low because the setup surface stays small and the cover input is explicit.
 
-这样风险最低，因为你只是在测试 publisher 阶段接入。
+这样风险最低，因为配置面很小，而且封面输入是显式的。
 
 ## Step 7: Turn On A Real Image API / 打开真实图像接口
 

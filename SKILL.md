@@ -61,6 +61,8 @@ For OpenClaw users, this usually means:
 - `scripts/xhs_pack_validate.py`
 - `scripts/xhs_manifest_builder.py`
 - `scripts/xhs_workflow.py`
+- `scripts/check_env.py`
+- `scripts/quickstart.py`
 - `scripts/run_manual.py`
 
 Only load the reference file relevant to the task at hand. Do not load every reference by default.

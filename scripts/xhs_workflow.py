@@ -13,13 +13,14 @@ import sys
 from dataclasses import dataclass
 from datetime import datetime
 from pathlib import Path
-from typing import Any
+from typing import Any, Optional
 
 from adapters.openclaw_agent import OpenClawAgentClient, OpenClawConfig
 from adapters.image_gemini import GeminiImageConfig, generate_image as generate_gemini_image
 from adapters.image_openai import OpenAIImageConfig, generate_image as generate_openai_image
 from adapters.publisher_openclaw import OpenClawPublisherAdapter, PublisherOpenClawContext
 from adapters.xhs_mock_publisher import MockPublisherAdapter
+from common_env import load_env_file
 
 
 SCRIPT_DIR = Path(__file__).resolve().parent
@@ -39,14 +40,14 @@ class WorkflowContext:
     mode: str
     publisher_adapter_name: str
     start_at: str
-    openclaw_client: OpenClawAgentClient | None
+    openclaw_client: Optional[OpenClawAgentClient]
 
 
 def now_iso() -> str:
     return datetime.now().astimezone().isoformat(timespec="seconds")
 
 
-def run_command(cmd: list[str], cwd: Path | None = None) -> str:
+def run_command(cmd: list[str], cwd: Optional[Path] = None) -> str:
     result = subprocess.run(cmd, cwd=str(cwd) if cwd else None, capture_output=True, text=True)
     if result.returncode != 0:
         details = "\n".join(part for part in [result.stdout.strip(), result.stderr.strip()] if part)
@@ -128,7 +129,7 @@ def resolve_pack_dir(packs_root: Path, scheduler: dict[str, Any], date_text: str
     return packs_root / f"{date_text}-{slug}"
 
 
-def ensure_pack(packs_root: Path, scheduler: dict[str, Any], date_text: str, pack_dir_arg: str | None) -> Path:
+def ensure_pack(packs_root: Path, scheduler: dict[str, Any], date_text: str, pack_dir_arg: Optional[str]) -> Path:
     pack_dir = Path(pack_dir_arg).resolve() if pack_dir_arg else resolve_pack_dir(packs_root, scheduler, date_text)
     if pack_dir.exists():
         return pack_dir
@@ -914,6 +915,7 @@ def main() -> int:
     parser.add_argument("--start-at", choices=STAGE_ORDER, default="research")
     parser.add_argument("--publisher-adapter", default=os.environ.get("XHS_PUBLISHER_ADAPTER", "mock"))
     args = parser.parse_args()
+    load_env_file()
     return run_workflow(args)
 
 
