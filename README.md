@@ -5,6 +5,56 @@ Build one XiaoHongShu post as a resumable pack:
 `research -> copy -> image -> review -> publisher`
 
 
+## What This Project Is
+
+This project is a workflow plugin for teams or individuals who want XiaoHongShu content generation and publishing to behave like an actual production workflow instead of a one-off prompt.
+
+It turns one post into a durable working directory with:
+
+- explicit stage boundaries
+- resumable state
+- reviewable intermediate files
+- a draft-first publisher path
+- clear handoff between human operators and OpenClaw
+
+这个项目本身是一个 workflow plugin，面向那些希望把“小红书内容生成和发布”做成真实生产流程，而不是一次性 prompt 的团队或个人。
+
+它把“一篇内容”变成一个可持续操作的工作目录，具备：
+
+- 明确的阶段边界
+- 可续跑的状态
+- 可审阅的中间文件
+- 默认先存草稿的 publisher 路径
+- 人和 OpenClaw 之间清晰的交接方式
+
+In practice, it is meant for cases like:
+
+- you want OpenClaw to generate content, but you still want files you can inspect
+- you want failures to be resumable instead of starting over
+- you want draft-first publishing instead of blind final publish
+- you want the same contract to work across local testing and real runs
+
+实际适用的场景包括：
+
+- 你希望 OpenClaw 负责生成内容，但仍然保留可检查的文件
+- 你希望失败后可以续跑，而不是每次重来
+- 你希望默认先存草稿，而不是直接盲发
+- 你希望同一套 contract 同时适用于本地验证和真实运行
+
+It is not trying to be:
+
+- a private content repository
+- a browser profile manager
+- a credential vault
+- a giant prompt collection
+
+它不是：
+
+- 私有内容仓库
+- 浏览器 profile 管理器
+- 凭证保险箱
+- 大而全的 prompt 集合
+
 ## What This Repo Owns
 
 - one stable pack format
