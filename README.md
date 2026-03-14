@@ -4,15 +4,6 @@ Build one XiaoHongShu post as a resumable pack:
 
 `research -> copy -> image -> review -> publisher`
 
-This repo is for two readers at the same time:
-
-- you, the operator who wants the shortest path to a successful run
-- your OpenClaw, which needs a stable contract, clear entrypoints, and predictable stage behavior
-
-这是一个同时写给两个读者的仓库：
-
-- 你，想尽快把流程跑通的操作者
-- 你的 OpenClaw，需要稳定 contract、明确入口和可预测阶段行为
 
 ## What This Repo Owns
 
