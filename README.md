@@ -156,7 +156,7 @@ publisher 动作应该被视为 adapter 边界：
 
 ## Current Status
 
-This repository is an MVP skeleton.
+This repository now includes a runnable draft-first publisher MVP.
 
 Implemented:
 
@@ -164,17 +164,17 @@ Implemented:
 - pack state management
 - pack validation
 - asset manifest building
-- generic workflow skeleton
+- runnable `save_draft` / `publish` workflow for an already prepared pack
 - manual run payload builder
-- codex-cli and mock publisher adapter stubs
+- codex-cli and mock publisher adapters
 
 Not fully implemented yet:
 
 - end-to-end research/copy/image/review execution
-- production-grade adapter orchestration
+- richer OpenClaw-native content generation pipeline
 - CI and release packaging
 
-当前仓库是一个 MVP 骨架。
+当前仓库已经包含一个可运行的 draft-first publisher MVP。
 
 已具备：
 
@@ -182,14 +182,14 @@ Not fully implemented yet:
 - pack 状态管理
 - pack 校验
 - asset manifest 生成
-- 通用 workflow skeleton
+- 面向已准备好 pack 的 `save_draft` / `publish` workflow
 - 手动 run payload 构造
-- codex-cli 与 mock publisher adapter stub
+- codex-cli 与 mock publisher adapter
 
 尚未完整实现：
 
 - 真正端到端的 research/copy/image/review 执行
-- production-grade 的 adapter orchestration
+- 更完整的 OpenClaw 原生内容生成链路
 - CI 与 release 打包
 
 ## Environment Assumptions
@@ -258,7 +258,7 @@ python3 scripts/run_manual.py \
   --extra "Write from a developer perspective and keep the tone honest."
 ```
 
-### 5. Run the workflow skeleton
+### 5. Run the workflow with the mock adapter
 
 ```bash
 python3 scripts/xhs_workflow.py \
@@ -267,6 +267,129 @@ python3 scripts/xhs_workflow.py \
   --date 2026-03-14 \
   --mode save_draft
 ```
+
+If you want a verified local example, use the bundled example pack:
+
+```bash
+python3 scripts/xhs_workflow.py \
+  --packs-root ./assets/examples \
+  --scheduler-file ./assets/examples/scheduler-save-draft.json \
+  --date 2026-03-14 \
+  --pack-dir ./assets/examples/example-pack \
+  --mode save_draft \
+  --publisher-adapter mock
+```
+
+That command is expected to end with:
+
+```json
+{
+  "status": "draft_saved"
+}
+```
+
+如果你想先跑一个仓库内自带、已经验证过的例子，可以直接用内置的 example pack：
+
+```bash
+python3 scripts/xhs_workflow.py \
+  --packs-root ./assets/examples \
+  --scheduler-file ./assets/examples/scheduler-save-draft.json \
+  --date 2026-03-14 \
+  --pack-dir ./assets/examples/example-pack \
+  --mode save_draft \
+  --publisher-adapter mock
+```
+
+这条命令的预期结果是：
+
+```json
+{
+  "status": "draft_saved"
+}
+```
+
+### 6. Run a real `save_draft` flow with the codex-cli adapter
+
+Prerequisites:
+
+- the pack is already review-approved
+- `assets/manifest.json` exists and points to one real cover image
+- the local XiaoHongShu automation CLI is installed
+- the login/browser environment is valid
+
+```bash
+export XHS_PUBLISHER_ADAPTER=codex-cli
+export XHS_SKILL_ROOT="$HOME/.codex/skills/xiaohongshu-skills"
+
+python3 scripts/xhs_workflow.py \
+  --packs-root ./packs \
+  --scheduler-file assets/examples/scheduler-save-draft.json \
+  --date 2026-03-14 \
+  --pack-dir ./packs/2026-03-14-developer-honest-share \
+  --mode save_draft \
+  --publisher-adapter codex-cli
+```
+
+Success means:
+
+- `preflight-publish` succeeded
+- `fill-publish` succeeded
+- `save-draft` succeeded
+- `workflow_state.json` shows `publisher_status: draft_saved`
+- `publish_result.json` shows `status: draft_saved`
+
+成功的判定标准：
+
+- `preflight-publish` 成功
+- `fill-publish` 成功
+- `save-draft` 成功
+- `workflow_state.json` 中 `publisher_status` 为 `draft_saved`
+- `publish_result.json` 中 `status` 为 `draft_saved`
+
+## OpenClaw Usage
+
+This repository is designed for people already using OpenClaw.
+
+The recommended split is:
+
+1. Use your OpenClaw agent or business repo to generate and review the pack.
+2. Let this repository own the stable publisher-stage contract.
+3. Invoke `scripts/xhs_workflow.py` from OpenClaw once the pack is approved.
+
+这个仓库是按“用户本身已经在用 OpenClaw”来设计的。
+
+建议的职责拆分是：
+
+1. 用你自己的 OpenClaw agent 或业务仓库生成并审核 pack。
+2. 让这个仓库负责稳定的 publisher-stage contract。
+3. 在 pack 审核通过后，再从 OpenClaw 调用 `scripts/xhs_workflow.py`。
+
+### Example OpenClaw prompt
+
+```text
+Use $openclaw-xhs-workflow to run the publisher stage only.
+
+Inputs:
+- scheduler file: /abs/path/to/scheduler.json
+- packs root: /abs/path/to/packs
+- pack dir: /abs/path/to/packs/2026-03-14-developer-honest-share
+- mode: save_draft
+- publisher adapter: codex-cli
+
+Rules:
+- Do not regenerate content.
+- Validate the pack first.
+- Refuse to publish if review_report.json is not approved.
+- Run preflight-publish -> fill-publish -> save-draft.
+- On failure, persist workflow_state.json, publish_result.json, and agent_runs.json.
+```
+
+### Workspace guidance for OpenClaw
+
+- Make sure the pack root lives inside the OpenClaw workspace.
+- Do not infer a pack root outside the workspace.
+- Pass `--pack-dir` explicitly when resuming a specific pack.
+- Keep scheduler files in the business repo, not in this plugin repo.
 
 ## Integration Model
 

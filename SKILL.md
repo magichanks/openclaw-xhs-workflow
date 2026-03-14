@@ -14,6 +14,11 @@ Use it when the task is to:
 - validate a pack before review or publishing
 - save a completed pack to draft or publish through a configured adapter
 
+For the current MVP, the strongest path is:
+
+- let your existing OpenClaw/business workflow generate and review the pack first
+- then use this skill to run the publisher stage in `save_draft` or `publish` mode
+
 ## Rules
 
 - Treat the pack directory as the source of truth for workflow state and outputs.
@@ -21,6 +26,7 @@ Use it when the task is to:
 - Respect `mode` and `publish_policy`; do not publish when the scheduler forbids it.
 - On failure, write the failure back to `workflow_state.json`, `publish_result.json`, and `agent_runs.json`.
 - Prefer `save_draft` as the default publisher path unless the scheduler explicitly allows publish.
+- Assume the pack is already review-approved before running the real publisher stage.
 
 ## Workflow
 
@@ -29,6 +35,11 @@ Use it when the task is to:
 3. Advance the pack through the state machine in `references/state_machine.md`.
 4. Validate the pack before review/publish with `scripts/xhs_pack_validate.py`.
 5. Use the configured publisher adapter only for publisher-stage actions.
+
+For OpenClaw users, this usually means:
+
+1. Your business repo or agent prepares the pack.
+2. This skill owns the stable pack validation + publisher transition.
 
 ## Resources
 

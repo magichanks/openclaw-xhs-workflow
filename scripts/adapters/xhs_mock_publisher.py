@@ -12,4 +12,4 @@ class MockPublisherAdapter:
         return {"logged_in": True, "adapter": "mock"}
 
     def run_action(self, action: str, args: list[str]) -> str:
-        return json.dumps({"success": True, "action": action, "args": args}, ensure_ascii=False)
+        return json.dumps({"success": True, "action": action}, ensure_ascii=False)

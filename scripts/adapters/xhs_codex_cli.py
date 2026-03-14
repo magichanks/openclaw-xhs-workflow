@@ -34,7 +34,21 @@ class CodexCliPublisherAdapter:
 
     def check_login(self) -> dict[str, Any]:
         output = self._run(["uv", "run", "python", str(self.config.cli_path), "check-login"])
-        return json.loads(output)
+        return extract_first_json_block(output)
 
     def run_action(self, action: str, args: list[str]) -> str:
         return self._run(["uv", "run", "python", str(self.config.cli_path), action, *args])
+
+
+def extract_first_json_block(text: str) -> dict[str, Any]:
+    decoder = json.JSONDecoder()
+    for index, char in enumerate(text):
+        if char != "{":
+            continue
+        try:
+            parsed, _ = decoder.raw_decode(text[index:])
+        except json.JSONDecodeError:
+            continue
+        if isinstance(parsed, dict):
+            return parsed
+    raise SystemExit("Could not parse JSON payload from publisher adapter output.")

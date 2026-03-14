@@ -121,6 +121,23 @@ def validate_manifest(pack_dir: Path, findings: list[dict[str, str]]) -> None:
         return
     if len(assets) != 1:
         add_finding(findings, "error", "asset_count", f"exactly 1 asset is allowed, got {len(assets)}")
+        return
+    asset = assets[0]
+    if not isinstance(asset, dict):
+        add_finding(findings, "error", "manifest_entry", "manifest entry must be an object")
+        return
+    rel_path = str(asset.get("path", "")).strip()
+    role = str(asset.get("role", "")).strip()
+    if role != "cover":
+        add_finding(findings, "error", "asset_role", f"expected role=cover, got {role or 'missing'}")
+    if not rel_path:
+        add_finding(findings, "error", "asset_path", "manifest entry is missing path")
+        return
+    asset_path = Path(rel_path)
+    if not asset_path.is_absolute():
+        asset_path = pack_dir / asset_path
+    if not asset_path.exists():
+        add_finding(findings, "error", "asset_missing", f"asset file missing: {rel_path}")
 
 
 def decision_for(findings: list[dict[str, str]]) -> str:
