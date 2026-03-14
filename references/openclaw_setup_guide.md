@@ -1,74 +1,42 @@
 # OpenClaw Setup Guide / OpenClaw 接入指南
 
-This guide is for users who already work inside OpenClaw and want to get this workflow running with the fewest moving parts.
+This guide is for both:
 
-这份指南面向已经在使用 OpenClaw 的用户，目标是用最少的变量把这套 workflow 跑起来。
+- the human operator who wants the fewest setup steps
+- the OpenClaw instance that needs a predictable rollout order
 
-## Why The Guide Defaults To `openclaw` Publisher
+这份指南同时写给：
 
-The guide now recommends `openclaw` as the default real publisher path for one practical reason:
+- 想用最少配置把流程跑通的人
+- 需要明确 rollout 顺序的 OpenClaw
 
-- it lets users keep publisher execution inside their own OpenClaw AI and tooling environment
+## One-Screen Recommendation
 
-This is not an architectural restriction.
+Use this rollout order and do not skip ahead:
 
-The architecture only requires a publisher adapter contract:
+1. `mock`
+2. `openclaw` with `source-file`
+3. `openai-images` or `gemini-images`
 
-- `check-login`
-- `preflight-publish`
-- `fill-publish`
-- `click-publish`
-- `save-draft`
+推荐 rollout 顺序，不要跳步：
 
-If another real publisher adapter is implemented later, the guide should be updated to include it.
+1. `mock`
+2. 带 `source-file` 的 `openclaw`
+3. `openai-images` 或 `gemini-images`
 
-现在这份指南默认推荐 `openclaw` 作为真实 publisher 路径，原因也很直接：
+Why:
 
-- 它可以把 publisher 执行留在用户自己的 OpenClaw AI 和工具环境里
+- `mock` proves the workflow engine
+- `source-file` proves your real pack can carry one real cover image
+- real image APIs are the last variable, not the first
 
-这不是架构限制。
+原因：
 
-架构层真正要求的只是 publisher adapter contract：
+- `mock` 先验证 workflow engine
+- `source-file` 再验证你的真实 pack 能带着一张真实封面图走完
+- 真实图像接口应该是最后一个变量，不应该是第一个变量
 
-- `check-login`
-- `preflight-publish`
-- `fill-publish`
-- `click-publish`
-- `save-draft`
-
-以后如果补上别的真实 publisher adapter，这份指南也应该继续扩展。
-
-## Recommended Rollout / 推荐接入顺序
-
-Do not start with every real integration turned on.
-
-Use this order:
-
-1. `mock` everywhere
-2. `source-file` for image
-3. `openclaw` for research/copy/review
-4. the real publisher adapter, `openclaw`
-5. `openai-images` or `gemini-images` for image generation
-
-That order isolates failures and makes debugging much faster.
-
-不要一开始就把所有真实集成都打开。
-
-推荐顺序是：
-
-1. 全部先用 `mock`
-2. 图片先切到 `source-file`
-3. research/copy/review 再切到 `openclaw`
-4. publisher 再切到真实 adapter，也就是 `openclaw`
-5. 最后再接 `openai-images` 或 `gemini-images`
-
-这个顺序能把故障面拆开，排错会快很多。
-
-## Shortest Successful Path / 最短跑通路径
-
-Run these three commands first:
-
-先跑这三条命令：
+## Shortest Path
 
 ```bash
 cp .env.example .env.local
@@ -76,21 +44,105 @@ cp .env.example .env.local
 /usr/bin/python3 scripts/quickstart.py --profile mock
 ```
 
-That is the lowest-friction path. It verifies the workflow engine, pack state machine, and publisher contract before any real account setup.
+Success means:
 
-这是阻力最小的路径。它会在任何真实账号配置之前，先验证 workflow engine、pack 状态机和 publisher contract。
+- a pack is created
+- `workflow_state.json` advances
+- final status is `draft_saved`
 
-## Step 1: Copy The Environment Template / 先复制环境模板
+成功的定义是：
+
+- pack 被创建
+- `workflow_state.json` 正常推进
+- 最终状态是 `draft_saved`
+
+## First Real Path
+
+When you are ready for the first real run, keep everything except the cover image as simple as possible:
 
 ```bash
-cp .env.example .env.local
+/usr/bin/python3 scripts/check_env.py --profile openclaw --source-file /abs/path/to/cover.png
+/usr/bin/python3 scripts/quickstart.py --profile openclaw --source-file /abs/path/to/cover.png
 ```
 
-Then fill only the values you actually need.
+Do this only after the mock path works.
 
-然后只填写你当前这一步真正需要的变量。
+第一次真实接入时，除了封面图之外，其余部分尽量保持简单：
 
-Minimum useful fields for local testing:
+```bash
+/usr/bin/python3 scripts/check_env.py --profile openclaw --source-file /abs/path/to/cover.png
+/usr/bin/python3 scripts/quickstart.py --profile openclaw --source-file /abs/path/to/cover.png
+```
+
+前提是 `mock` 路径已经跑通。
+
+## What The Profiles Mean
+
+### `mock`
+
+Use when:
+
+- you want the first successful run
+- you are validating local installation
+- you do not want external dependencies yet
+
+适用场景：
+
+- 想先拿到第一次成功运行
+- 验证本地安装是否正常
+- 暂时不引入外部依赖
+
+### `openclaw`
+
+Use when:
+
+- your OpenClaw should write research/copy/review
+- your OpenClaw should execute publisher actions
+- you can provide one explicit cover image
+
+适用场景：
+
+- 让 OpenClaw 生成 research/copy/review
+- 让 OpenClaw 执行 publisher 动作
+- 你能提供一张明确的封面图
+
+### `openai-images` / `gemini-images`
+
+Use only after `openclaw + source-file` works.
+
+只在 `openclaw + source-file` 跑通之后再打开。
+
+## What OpenClaw Should Do
+
+When you invoke this repo from OpenClaw, keep the instructions narrow:
+
+1. read the scheduler first
+2. treat the pack directory as the source of truth
+3. run only from the requested `--start-at` stage
+4. default to `save_draft`
+5. write failures back into the pack files
+
+从 OpenClaw 调用这个仓库时，指令应该尽量收敛：
+
+1. 先读 scheduler
+2. 把 pack 目录当作唯一事实源
+3. 只从指定的 `--start-at` 阶段开始执行
+4. 默认走 `save_draft`
+5. 失败时把结果写回 pack 文件
+
+## Environment Notes
+
+### Minimum local setup
+
+`.env.local` is optional but recommended.
+
+If present, `scripts/check_env.py`, `scripts/quickstart.py`, and `scripts/xhs_workflow.py` load it automatically.
+
+`.env.local` 不是强制的，但推荐保留。
+
+如果存在，`scripts/check_env.py`、`scripts/quickstart.py` 和 `scripts/xhs_workflow.py` 都会自动加载它。
+
+### Minimum useful values
 
 ```bash
 XHS_PUBLISHER_ADAPTER=mock
@@ -99,127 +151,7 @@ XHS_OPENCLAW_SESSION_ID=xhs-workflow
 XHS_OPENCLAW_THINKING=medium
 ```
 
-本地最小可用配置就是上面这几项。
-
-## Step 2: Load The Environment / 加载环境变量
-
-If you use `scripts/check_env.py` or `scripts/quickstart.py`, they load `.env.local` automatically.
-
-如果你使用 `scripts/check_env.py` 或 `scripts/quickstart.py`，它们会自动加载 `.env.local`。
-
-If you still want to load it manually:
-
-如果你仍然想手动加载：
-
-```bash
-set -a
-source ./.env.local
-set +a
-```
-
-If you prefer direnv or another secrets loader, that is fine too. The workflow only requires these values to be present in the environment.
-
-如果你更习惯 direnv 或其他 secrets loader 也可以，关键只是这些变量最终要出现在环境里。
-
-## Step 3: Verify The Local Full Flow First / 先验证本地全流程
-
-This does not require a real image API, browser profile, or publisher login.
-
-这一步不需要真实图像接口、不需要浏览器 profile，也不需要 publisher 登录态。
-
-```bash
-/usr/bin/python3 scripts/check_env.py --profile mock
-/usr/bin/python3 scripts/quickstart.py --profile mock
-```
-
-Expected result:
-
-- `status` is `draft_saved`
-- a new pack is created under `./tmp-packs`
-
-预期结果：
-
-- `status` 为 `draft_saved`
-- `./tmp-packs` 下会生成一个新 pack
-
-## Step 4: Switch Image To `source-file` / 图片先切到 `source-file`
-
-This is the safest first real-world step.
-
-这是最稳的第一步真实接入。
-
-1. Put a real cover image somewhere in your business repo.
-2. Run `/usr/bin/python3 scripts/check_env.py --profile openclaw --source-file /abs/path/to/cover.png`.
-3. Run `/usr/bin/python3 scripts/quickstart.py --profile openclaw --source-file /abs/path/to/cover.png`.
-
-1. 在你的业务仓库里放一张真实封面图。
-2. 运行 `/usr/bin/python3 scripts/check_env.py --profile openclaw --source-file /abs/path/to/cover.png`。
-3. 运行 `/usr/bin/python3 scripts/quickstart.py --profile openclaw --source-file /abs/path/to/cover.png`。
-
-If you omit `--source-file`, quickstart uses the bundled example cover first.
-
-如果你省略 `--source-file`，quickstart 会先使用仓库内置的示例封面。
-
-Now the workflow remains deterministic, but the image input can already be real.
-
-这样 workflow 仍然是确定性的，但图片输入已经可以是真实素材。
-
-## Step 5: Turn On OpenClaw For Content Stages / 打开 OpenClaw 内容阶段
-
-Use `openclaw` adapters only after the local mock path works.
-
-只有在本地 mock 路径跑通之后，再打开 `openclaw` adapter。
-
-Recommended scheduler settings:
-
-```json
-{
-  "research_policy": {
-    "adapter": "openclaw",
-    "limit": 5
-  },
-  "copy_policy": {
-    "adapter": "openclaw",
-    "language": "zh-CN"
-  },
-  "review_policy": {
-    "adapter": "openclaw"
-  },
-  "openclaw": {
-    "agent": "main",
-    "session_id": "xhs-workflow",
-    "thinking": "medium"
-  }
-}
-```
-
-If you want deterministic review gating with a generated summary, keep:
-
-- `review_policy.adapter = openclaw`
-
-The workflow still uses deterministic validation to decide whether the pack is blocked.
-
-如果你想要“OpenClaw 生成 review summary，但最终放行仍由确定性校验决定”，那就保留：
-
-- `review_policy.adapter = openclaw`
-
-因为 workflow 仍然会用 deterministic validation 决定 pack 是否被拦住。
-
-## Step 6: Turn On The Real Publisher / 打开真实 publisher
-
-Only do this after you have verified:
-
-- OpenClaw can generate the pack
-- the pack reaches `reviewed`
-- `assets/manifest.json` points to one real cover image
-
-只有在下面三件事都确认无误之后，再打开真实 publisher：
-
-- OpenClaw 能稳定生成 pack
-- pack 能走到 `reviewed`
-- `assets/manifest.json` 已经指向真实封面图
-
-Then set:
+### For the real OpenClaw publisher path
 
 ```bash
 XHS_PUBLISHER_ADAPTER=openclaw
@@ -227,161 +159,54 @@ XHS_PUBLISHER_OPENCLAW_AGENT=main
 XHS_PUBLISHER_OPENCLAW_SESSION_ID=xhs-workflow-publisher
 ```
 
-Recommended first command:
+### For real image generation
 
-```bash
-/usr/bin/python3 scripts/check_env.py --profile openclaw --source-file /abs/path/to/cover.png
-/usr/bin/python3 scripts/quickstart.py --profile openclaw --source-file /abs/path/to/cover.png
-```
-
-That keeps the risk low because the setup surface stays small and the cover input is explicit.
-
-这样风险最低，因为配置面很小，而且封面输入是显式的。
-
-## Step 7: Turn On A Real Image API / 打开真实图像接口
-
-### OpenAI
-
-Set:
+OpenAI:
 
 ```bash
 OPENAI_API_KEY=...
 XHS_IMAGE_MODEL=gpt-image-1.5
 ```
 
-Scheduler change:
-
-```json
-{
-  "image_policy": {
-    "adapter": "openai-images",
-    "model": "gpt-image-1.5",
-    "size": "1024x1024"
-  }
-}
-```
-
-OpenAI 路径只需要补 API key 和 image policy。
-
-### Gemini
-
-Set:
+Gemini:
 
 ```bash
 GEMINI_API_KEY=...
 XHS_GEMINI_IMAGE_MODEL=gemini-2.5-flash-image
 ```
 
-Scheduler change:
+More image-specific setup lives in [image_adapter_setup.md](/Users/maic/virtualcloset/openclaw-xhs-workflow/references/image_adapter_setup.md).
 
-```json
-{
-  "image_policy": {
-    "adapter": "gemini-images",
-    "model": "gemini-2.5-flash-image",
-    "aspect_ratio": "3:4"
-  }
-}
-```
+## Common Failure Checks
 
-Gemini 路径同样只需要补 API key 和 image policy。
-
-## Common Failure Modes / 常见失败点
-
-### 1. OpenClaw stage fails immediately
+### `mock` fails
 
 Check:
 
-- `OPENCLAW_BIN`
-- the `openclaw` binary is on `PATH`
-- the configured OpenClaw `agent` exists
+- `/usr/bin/python3` exists
+- the repo is writable
+- the scripts can create `./tmp-packs`
 
-### 1. OpenClaw 阶段一开始就失败
+### `openclaw` fails early
 
-检查：
+Check:
 
-- `OPENCLAW_BIN`
-- `openclaw` 是否在 `PATH` 上
-- 配置的 OpenClaw `agent` 是否存在
+- `OPENCLAW_BIN` or `openclaw` on `PATH`
+- the configured OpenClaw agent exists
+- the source cover file exists
 
-### 2. Publisher stage says not logged in
+### publisher fails
 
 Check:
 
 - `XHS_PUBLISHER_ADAPTER=openclaw`
-- `XHS_PUBLISHER_OPENCLAW_AGENT`
-- your XiaoHongShu browser/login environment
+- the publisher OpenClaw agent exists
+- the XiaoHongShu login/browser environment is valid
 
-### 2. Publisher 阶段提示未登录
-
-检查：
-
-- `XHS_PUBLISHER_ADAPTER=openclaw`
-- `XHS_PUBLISHER_OPENCLAW_AGENT`
-- 小红书浏览器/登录环境是否可用
-
-### 3. Image stage fails before generation
+### image generation fails
 
 Check:
 
-- the adapter name in `image_policy.adapter`
-- required env vars exist
-- `image_prompts.md` contains a usable `- Prompt:` line, or the fallback prompt is acceptable
-
-### 3. Image 阶段在生成前就失败
-
-检查：
-
-- `image_policy.adapter` 是否写对
-- 必需环境变量是否存在
-- `image_prompts.md` 里是否有可用的 `- Prompt:` 行，或者 fallback prompt 是否可接受
-
-### 4. Pack is blocked before publisher
-
-Check:
-
-- `review_report.json`
-- `assets/manifest.json`
-- `workflow_state.json`
-- title/body/hashtags do not still contain placeholders
-
-### 4. Pack 在 publisher 前被拦住
-
-检查：
-
-- `review_report.json`
-- `assets/manifest.json`
-- `workflow_state.json`
-- title/body/hashtags 是否还残留 placeholder
-
-## Suggested First Real Workflow / 推荐的第一套真实工作流
-
-For most users, this is the safest first production-shaped combination:
-
-- `research_policy.adapter = openclaw`
-- `copy_policy.adapter = openclaw`
-- `image_policy.adapter = source-file`
-- `review_policy.adapter = validator`
-- `publisher-adapter = openclaw`
-
-That keeps the fragile parts separated:
-
-- OpenClaw handles text generation
-- a human or business repo controls the cover image
-- deterministic validation decides whether the workflow can continue
-- the publisher only runs after the pack is ready
-
-对大多数用户来说，最稳的第一套生产形态组合仍然是：
-
-- `research_policy.adapter = openclaw`
-- `copy_policy.adapter = openclaw`
-- `image_policy.adapter = source-file`
-- `review_policy.adapter = validator`
-- `publisher-adapter = openclaw`
-
-这样能把脆弱点拆开：
-
-- OpenClaw 负责文本生成
-- 人或业务仓库控制封面图
-- 确定性校验决定 workflow 能不能继续
-- publisher 只在 pack 真正准备好后才运行
+- the selected adapter name is correct
+- the required API key exists
+- `image_prompts.md` contains a usable prompt, or the fallback prompt is acceptable
