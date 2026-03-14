@@ -60,6 +60,14 @@ Required fields:
 Optional fields:
 
 - `source_file`: required when `adapter=source-file`
+- `model`: used by `openai-images` or `gemini-images`
+- `size`: used by `openai-images`
+- `quality`: optional for `openai-images`
+- `background`: optional for `openai-images`
+- `aspect_ratio`: optional for `gemini-images`
+- `image_size`: optional for `gemini-images`
+- `api_key_env`: optional override env var name for `openai-images`
+- `api_key_env`: optional override env var name for `gemini-images`
 
 ### `review_policy`
 
@@ -88,3 +96,9 @@ If you use OpenClaw for `research`, `copy`, or `review`, the scheduler may inclu
 
 This block should contain workflow-facing OpenClaw settings only.
 Do not store user secrets or machine-private absolute paths here.
+
+## Image Setup Reference
+
+For real image adapters and environment-variable setup, see:
+
+- `references/image_adapter_setup.md`

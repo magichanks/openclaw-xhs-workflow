@@ -167,7 +167,7 @@ Implemented:
 - asset manifest building
 - runnable `research -> copy -> image -> review -> save_draft/publish` workflow
 - manual run payload builder
-- OpenClaw, mock, validator, source-file, and publisher adapters
+- OpenClaw, mock, validator, source-file, OpenAI image, Gemini image, and publisher adapters
 
 Not fully implemented yet:
 
@@ -185,7 +185,7 @@ Not fully implemented yet:
 - asset manifest 生成
 - 可运行的 `research -> copy -> image -> review -> save_draft/publish` 流程
 - 手动 run payload 构造
-- OpenClaw、mock、validator、source-file 与 publisher adapter
+- OpenClaw、mock、validator、source-file、OpenAI 图像、Gemini 图像与 publisher adapter
 
 尚未完整实现：
 
@@ -208,6 +208,11 @@ If you use the codex-cli publisher adapter, you also need:
 - a local installation of the XiaoHongShu automation skill/CLI
 - a valid browser/login environment
 
+If you use real image adapters, you will also need:
+
+- `OPENAI_API_KEY` for `openai-images`
+- or `GEMINI_API_KEY` for `gemini-images`
+
 最小环境前提：
 
 - Python 3.10+
@@ -220,6 +225,11 @@ If you use the codex-cli publisher adapter, you also need:
 - `uv`
 - 本地安装好的小红书自动化 skill/CLI
 - 可用的浏览器与登录环境
+
+如果使用真实图像 adapter，还需要：
+
+- `openai-images` 对应的 `OPENAI_API_KEY`
+- 或 `gemini-images` 对应的 `GEMINI_API_KEY`
 
 ## Quick Start
 
@@ -283,7 +293,7 @@ Built-in stage adapters:
 
 - `research_policy.adapter`: `mock` or `openclaw`
 - `copy_policy.adapter`: `mock` or `openclaw`
-- `image_policy.adapter`: `mock` or `source-file`
+- `image_policy.adapter`: `mock`, `source-file`, `openai-images`, or `gemini-images`
 - `review_policy.adapter`: `validator` or `openclaw`
 - `publisher-adapter`: `mock` or `codex-cli`
 
@@ -291,9 +301,31 @@ Built-in stage adapters:
 
 - `research_policy.adapter`：`mock` 或 `openclaw`
 - `copy_policy.adapter`：`mock` 或 `openclaw`
-- `image_policy.adapter`：`mock` 或 `source-file`
+- `image_policy.adapter`：`mock`、`source-file`、`openai-images` 或 `gemini-images`
 - `review_policy.adapter`：`validator` 或 `openclaw`
 - `publisher-adapter`：`mock` 或 `codex-cli`
+
+### Image adapter setup
+
+If you want real image generation instead of `mock` or `source-file`, read:
+
+- `references/image_adapter_setup.md`
+
+For most OpenClaw users, the recommended rollout is:
+
+1. start with `mock`
+2. switch to `source-file`
+3. then move to `openai-images` or `gemini-images`
+
+如果你要接真实图像生成接口，而不是只用 `mock` 或 `source-file`，先看这里：
+
+- `references/image_adapter_setup.md`
+
+对多数 OpenClaw 用户，更稳的接入顺序是：
+
+1. 先用 `mock`
+2. 再切到 `source-file`
+3. 最后再接 `openai-images` 或 `gemini-images`
 
 ### Start from an empty pack with the mock adapters
 
@@ -377,6 +409,11 @@ If the user already works inside OpenClaw, the recommended production-shaped pat
 Use the bundled example scheduler as a template:
 
 - `assets/examples/scheduler-openclaw-save-draft.json`
+
+If you want to pair OpenClaw with a real image API, duplicate that scheduler and change:
+
+- `image_policy.adapter` to `openai-images` or `gemini-images`
+- the corresponding env vars described in `references/image_adapter_setup.md`
 
 如果用户本来就在使用 OpenClaw，推荐的生产形态是：
 

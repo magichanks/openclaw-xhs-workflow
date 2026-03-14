@@ -4,6 +4,7 @@
 from __future__ import annotations
 
 import argparse
+import hashlib
 import json
 import os
 import shutil
@@ -15,6 +16,8 @@ from pathlib import Path
 from typing import Any
 
 from adapters.openclaw_agent import OpenClawAgentClient, OpenClawConfig
+from adapters.image_gemini import GeminiImageConfig, generate_image as generate_gemini_image
+from adapters.image_openai import OpenAIImageConfig, generate_image as generate_openai_image
 from adapters.xhs_codex_cli import CodexCliPublisherAdapter, PublisherConfig
 from adapters.xhs_mock_publisher import MockPublisherAdapter
 
@@ -219,6 +222,8 @@ def build_scheduler_defaults(scheduler: dict[str, Any]) -> dict[str, Any]:
     image_policy.setdefault("required_role", "cover")
     image_policy.setdefault("required_output", "assets/cover.png")
     image_policy.setdefault("forbid_detail_images", True)
+    image_policy.setdefault("model", os.environ.get("XHS_IMAGE_MODEL", "gpt-image-1.5"))
+    image_policy.setdefault("size", os.environ.get("XHS_IMAGE_SIZE", "1024x1024"))
     scheduler["image_policy"] = image_policy
     scheduler.setdefault("review_policy", {"adapter": "validator"})
     scheduler.setdefault(
@@ -366,6 +371,21 @@ def fail_workflow(pack_dir: Path, state: str, reason: str, step: str) -> None:
 
 def scheduler_json(scheduler: dict[str, Any]) -> str:
     return json.dumps(scheduler, ensure_ascii=False, indent=2)
+
+
+def cover_prompt_from_pack(pack_dir: Path, scheduler: dict[str, Any]) -> str:
+    prompt_path = pack_dir / "image_prompts.md"
+    if prompt_path.exists():
+        for line in prompt_path.read_text(encoding="utf-8").splitlines():
+            if line.strip().startswith("- Prompt:"):
+                value = line.split(":", 1)[1].strip()
+                if value:
+                    return value
+    return (
+        f"Create one Xiaohongshu cover image. Topic: {scheduler['topic']}. "
+        f"Core value: {scheduler['core_value']}. Audience: {', '.join(scheduler['audience'])}. "
+        "Keep it clean, honest, readable, and suitable for a single cover image."
+    )
 
 
 def run_research_stage(ctx: WorkflowContext) -> None:
@@ -596,10 +616,12 @@ def run_image_stage(ctx: WorkflowContext) -> None:
     output_rel = str(policy.get("required_output", "assets/cover.png"))
     output_path = ctx.pack_dir / output_rel
     output_path.parent.mkdir(parents=True, exist_ok=True)
+    prompt = cover_prompt_from_pack(ctx.pack_dir, ctx.scheduler)
+    prompt_hash = hashlib.sha256(prompt.encode("utf-8")).hexdigest()[:16]
 
     if adapter == "mock":
         output_path.write_bytes(bytes.fromhex(MOCK_PNG_HEX))
-        create_manifest(ctx.pack_dir, output_rel, "mock-image", "mock-cover", "generated")
+        create_manifest(ctx.pack_dir, output_rel, "mock-image", prompt_hash, "generated")
     elif adapter == "source-file":
         source_text = str(policy.get("source_file", "")).strip()
         if not source_text:
@@ -611,7 +633,55 @@ def run_image_stage(ctx: WorkflowContext) -> None:
         if not source_path.exists():
             raise SystemExit(f"image source file does not exist: {source_path}")
         shutil.copyfile(source_path, output_path)
-        create_manifest(ctx.pack_dir, output_rel, "source-file", source_path.name, "generated")
+        create_manifest(ctx.pack_dir, output_rel, "source-file", prompt_hash, "generated")
+    elif adapter == "openai-images":
+        api_key_env = str(policy.get("api_key_env", "")).strip()
+        api_key = os.environ.get(api_key_env, "").strip() if api_key_env else ""
+        if not api_key:
+            api_key = os.environ.get("OPENAI_API_KEY", "").strip()
+        if not api_key:
+            raise SystemExit("openai-images adapter requires OPENAI_API_KEY or image_policy.api_key_env.")
+        base_url = str(policy.get("base_url") or os.environ.get("XHS_IMAGE_BASE_URL") or "https://api.openai.com/v1").strip()
+        model = str(policy.get("model") or os.environ.get("XHS_IMAGE_MODEL") or "gpt-image-1.5").strip()
+        size = str(policy.get("size") or os.environ.get("XHS_IMAGE_SIZE") or "1024x1024").strip()
+        quality = str(policy.get("quality") or os.environ.get("XHS_IMAGE_QUALITY") or "").strip() or None
+        background = str(policy.get("background") or os.environ.get("XHS_IMAGE_BACKGROUND") or "").strip() or None
+        image_bytes, meta = generate_openai_image(
+            OpenAIImageConfig(
+                api_key=api_key,
+                base_url=base_url,
+                model=model,
+                size=size,
+                quality=quality,
+                background=background,
+            ),
+            prompt,
+        )
+        output_path.write_bytes(image_bytes)
+        create_manifest(ctx.pack_dir, output_rel, str(meta.get("model", model)), prompt_hash, str(meta.get("status", "generated")))
+    elif adapter == "gemini-images":
+        api_key_env = str(policy.get("api_key_env", "")).strip()
+        api_key = os.environ.get(api_key_env, "").strip() if api_key_env else ""
+        if not api_key:
+            api_key = os.environ.get("GEMINI_API_KEY", "").strip()
+        if not api_key:
+            raise SystemExit("gemini-images adapter requires GEMINI_API_KEY or image_policy.api_key_env.")
+        base_url = str(policy.get("base_url") or os.environ.get("XHS_GEMINI_BASE_URL") or "https://generativelanguage.googleapis.com/v1beta").strip()
+        model = str(policy.get("model") or os.environ.get("XHS_GEMINI_IMAGE_MODEL") or "gemini-2.5-flash-image").strip()
+        aspect_ratio = str(policy.get("aspect_ratio") or os.environ.get("XHS_GEMINI_ASPECT_RATIO") or "").strip() or None
+        image_size = str(policy.get("image_size") or os.environ.get("XHS_GEMINI_IMAGE_SIZE") or "").strip() or None
+        image_bytes, meta = generate_gemini_image(
+            GeminiImageConfig(
+                api_key=api_key,
+                base_url=base_url,
+                model=model,
+                aspect_ratio=aspect_ratio,
+                image_size=image_size,
+            ),
+            prompt,
+        )
+        output_path.write_bytes(image_bytes)
+        create_manifest(ctx.pack_dir, output_rel, str(meta.get("model", model)), prompt_hash, str(meta.get("status", "generated")))
     else:
         raise SystemExit(f"Unsupported image adapter: {adapter}")
 

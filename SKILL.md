@@ -17,7 +17,7 @@ Use it when the task is to:
 For the current engine, the strongest path is:
 
 - let OpenClaw or mock adapters handle `research` and `copy`
-- let `mock` or `source-file` handle `image`
+- let `mock`, `source-file`, `openai-images`, or `gemini-images` handle `image`
 - let `validator` or OpenClaw handle `review`
 - let a publisher adapter handle `save_draft` or `publish`
 
@@ -50,6 +50,7 @@ For OpenClaw users, this usually means:
 - Scheduler contract: `references/scheduler_schema.md`
 - State machine: `references/state_machine.md`
 - Publisher adapter boundary: `references/publisher_contract.md`
+- Image adapter setup: `references/image_adapter_setup.md`
 - Integration guidance: `references/business_integration.md`
 
 ## Scripts
