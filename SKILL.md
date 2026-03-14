@@ -51,6 +51,7 @@ For OpenClaw users, this usually means:
 - State machine: `references/state_machine.md`
 - Publisher adapter boundary: `references/publisher_contract.md`
 - Image adapter setup: `references/image_adapter_setup.md`
+- OpenClaw setup guide: `references/openclaw_setup_guide.md`
 - Integration guidance: `references/business_integration.md`
 
 ## Scripts

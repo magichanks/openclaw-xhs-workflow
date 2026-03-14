@@ -73,6 +73,16 @@ Key directories:
 - `assets/examples/`：示例 scheduler 与 example pack
 - `agents/openai.yaml`：skill 的 UI metadata
 
+Setup entrypoints:
+
+- `.env.example`
+- `references/openclaw_setup_guide.md`
+
+接入入口：
+
+- `.env.example`
+- `references/openclaw_setup_guide.md`
+
 ## Core Concepts
 
 ### 1. Pack
@@ -232,6 +242,18 @@ If you use real image adapters, you will also need:
 - 或 `gemini-images` 对应的 `GEMINI_API_KEY`
 
 ## Quick Start
+
+Before the first real run, it is recommended to:
+
+1. copy `.env.example` to `.env.local`
+2. read `references/openclaw_setup_guide.md`
+3. run the all-mock full flow once
+
+第一次接入前，建议先做三步：
+
+1. 把 `.env.example` 复制成 `.env.local`
+2. 阅读 `references/openclaw_setup_guide.md`
+3. 先跑通一次全 mock 流程
 
 ### 1. Create a pack
 
