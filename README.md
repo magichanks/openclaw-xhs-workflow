@@ -264,15 +264,15 @@ If OpenClaw is invoking this repo, keep the instruction narrow:
 
 ## Main Entry Points
 
-- [.env.example](/Users/maic/virtualcloset/openclaw-xhs-workflow/.env.example)
-- [scripts/check_env.py](/Users/maic/virtualcloset/openclaw-xhs-workflow/scripts/check_env.py)
-- [scripts/quickstart.py](/Users/maic/virtualcloset/openclaw-xhs-workflow/scripts/quickstart.py)
-- [scripts/xhs_workflow.py](/Users/maic/virtualcloset/openclaw-xhs-workflow/scripts/xhs_workflow.py)
+- [.env.example](.env.example)
+- [scripts/check_env.py](scripts/check_env.py)
+- [scripts/quickstart.py](scripts/quickstart.py)
+- [scripts/xhs_workflow.py](scripts/xhs_workflow.py)
 
 ## Read Next
 
-- [SKILL.md](/Users/maic/virtualcloset/openclaw-xhs-workflow/SKILL.md)
-- [references/openclaw_setup_guide.md](/Users/maic/virtualcloset/openclaw-xhs-workflow/references/openclaw_setup_guide.md)
-- [references/image_adapter_setup.md](/Users/maic/virtualcloset/openclaw-xhs-workflow/references/image_adapter_setup.md)
-- [references/pack_schema.md](/Users/maic/virtualcloset/openclaw-xhs-workflow/references/pack_schema.md)
-- [references/publisher_contract.md](/Users/maic/virtualcloset/openclaw-xhs-workflow/references/publisher_contract.md)
+- [SKILL.md](SKILL.md)
+- [references/openclaw_setup_guide.md](references/openclaw_setup_guide.md)
+- [references/image_adapter_setup.md](references/image_adapter_setup.md)
+- [references/pack_schema.md](references/pack_schema.md)
+- [references/publisher_contract.md](references/publisher_contract.md)

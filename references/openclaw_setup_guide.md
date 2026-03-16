@@ -191,7 +191,7 @@ GEMINI_API_KEY=...
 XHS_GEMINI_IMAGE_MODEL=gemini-2.5-flash-image
 ```
 
-More image-specific setup lives in [image_adapter_setup.md](/Users/maic/virtualcloset/openclaw-xhs-workflow/references/image_adapter_setup.md).
+More image-specific setup lives in [image_adapter_setup.md](image_adapter_setup.md).
 
 ## Common Failure Checks
 
